@@ -10,12 +10,6 @@ type LoginApiResponse = {
     message?: string
 }
 
-type AuthActionResponse = {
-    ok: boolean,
-    status: number,
-    message?: string
-}
-
 enum Endpoints {
     Login = 'auth/login',
     Me = 'auth/me'
@@ -26,6 +20,8 @@ export async function login(email: string, password: string): Promise<AuthAction
     const response = await axios.post<LoginApiResponse>(route, {
         email,
         password
+    }, {
+        validateStatus: () => true
     })
 
     if (response.status !== 200) {
@@ -37,7 +33,7 @@ export async function login(email: string, password: string): Promise<AuthAction
     return { ok: true, status: response.status, message: response.data.message }
 }
 
-export async function me() {
+export async function me(): Promise<User | null> {
     const cookiesStore = await cookies();
     const token = cookiesStore.get('accessToken');
     if (!token) {
@@ -45,11 +41,16 @@ export async function me() {
     }
 
     const route = BASIC_API_URL + Endpoints.Me;
-    const response = await axios.get(route, {
+    const response = await axios.get<User>(route, {
         headers: {
             Authorization: `Bearer ${token.value}`
         },
+        validateStatus: () => true
     });
 
-    console.log(response.data)
+    if (response.status !== 200) {
+        return null;
+    }
+
+    return response.data;
 }

@@ -1,10 +1,10 @@
 import { create } from "zustand"
-import { login } from "@/actions/auth";
+import { login, me } from "@/actions/auth";
 
 interface UseAuth {
     user?: User
     isLoggedIn: boolean
-    login: (email: string, password: string) => Promise<boolean>
+    login: (email: string, password: string) => Promise<AuthActionResponse>
 }
 
 export const useAuth = create<UseAuth>((set) => ({
@@ -13,10 +13,18 @@ export const useAuth = create<UseAuth>((set) => ({
 
     async login(email: string, password: string) {
         const response = await login(email, password)
-        if (response.ok) {
-            set({ isLoggedIn: true })
+        if (!response.ok) {
+            return response
+        }
+        const userData = await me();
+        if (!userData) {
+            return response;
         }
 
-        return true;
+        set({ isLoggedIn: true })
+
+        set({ user: userData });
+
+        return { ok: true, status: 200, message: 'Вы авторизованы!' };
     },
 }))
