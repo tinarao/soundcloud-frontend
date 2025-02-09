@@ -9,11 +9,11 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+import Cookies from "cookies-js";
+import { BASIC_API_URL } from "@/lib/consts";
 import { useRouter } from "next/navigation";
 
 const UploadTrackForm = () => {
-  const { verify, isLoggedIn } = useAuth();
   const router = useRouter();
   const [genres, setGenres] = useState<string[]>([]);
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -26,7 +26,16 @@ const UploadTrackForm = () => {
       description: "",
     },
     onSubmit: async ({ value }) => {
-      // Do something with form data
+      if (!artworkFile) {
+        toast({ title: "Вы не выбрали обложку!", variant: "destructive" });
+        return;
+      }
+
+      if (!audioFile) {
+        toast({ title: "Вы не выбрали трек!", variant: "destructive" });
+        return;
+      }
+
       const data = {
         ...value,
         artworkFile,
@@ -34,8 +43,34 @@ const UploadTrackForm = () => {
         genres,
       };
 
-      const response = await axios.postForm("api_url", data);
-      console.log(response);
+      const token = Cookies.get("accessToken");
+
+      const apiRoute = BASIC_API_URL + "track";
+      const response = await axios.postForm(apiRoute, data, {
+        validateStatus: () => true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      switch (response.status) {
+        case 422:
+          toast({
+            title:
+              "Форма заполнена некорректно. Обновите страницу и заполните её ещё раз.",
+          });
+          return;
+        case 401:
+          toast({
+            title:
+              "Ошибка авторизации. Обновите страницу и заполните форму ещё раз.",
+          });
+          return;
+        default:
+          toast({ title: "Трек успешно загружен!" });
+          router.replace("/app/track/" + response.data.slug);
+          return;
+      }
     },
   });
 
@@ -161,7 +196,14 @@ const UploadTrackForm = () => {
               </div>
             </div>
             <div>
-              <Button disabled={form.state.isSubmitting} type="submit">
+              <Button
+                disabled={
+                  form.state.isSubmitting ||
+                  genres.length === 0 ||
+                  genres.length > 5
+                }
+                type="submit"
+              >
                 Сохранить
               </Button>
             </div>

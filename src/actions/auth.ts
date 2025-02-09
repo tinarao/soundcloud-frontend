@@ -18,7 +18,7 @@ enum Endpoints {
 export async function login(
   email: string,
   password: string,
-): Promise<AuthActionResponse> {
+): Promise<ActionResponse> {
   const cookiesStore = await cookies();
   const route = BASIC_API_URL + Endpoints.Login;
   const response = await axios.post<LoginApiResponse>(

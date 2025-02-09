@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 import { login, me } from "@/actions/auth";
 
 interface UseAuth {
   user?: User;
   isLoggedIn: boolean;
-  login: (email: string, password: string) => Promise<AuthActionResponse>;
+  login: (email: string, password: string) => Promise<ActionResponse>;
   verify: () => Promise<void>;
 }
 
