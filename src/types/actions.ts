@@ -1,5 +1,5 @@
 type AuthActionResponse = {
-    ok: boolean,
-    status: number,
-    message?: string
-}
+  ok: boolean;
+  status: number;
+  message?: string;
+};
