@@ -7,9 +7,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useAuth } from "@/hooks/use-auth";
-import { BookAudio, CassetteTape, LogOut, Upload, User } from "lucide-react";
+import {
+  BookAudio,
+  CassetteTape,
+  Cog,
+  LogOut,
+  Upload,
+  User,
+} from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
 const UserPopover = () => {
   const { user } = useAuth();
@@ -33,6 +39,11 @@ const UserPopover = () => {
         <Button variant="ghost">
           <CassetteTape />
           Плейлисты
+        </Button>
+        <Button variant="ghost" asChild>
+          <Link href="/app/settings">
+            <Cog /> Настройки
+          </Link>
         </Button>
         <Button variant="ghost" asChild>
           <Link href="/upload" target="_blank">
