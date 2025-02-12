@@ -3,6 +3,7 @@
 import axios from "axios";
 import { BASIC_API_URL } from "@/lib/consts";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 type LoginApiResponse = {
   accessToken: string;
@@ -13,19 +14,60 @@ type LoginApiResponse = {
 enum Endpoints {
   Login = "auth/login",
   Me = "auth/me",
+  Register = "auth/register",
 }
 
-export async function login(
-  email: string,
-  password: string,
-): Promise<ActionResponse> {
+export async function register(dto: RegisterDTO): Promise<ActionResponse> {
+  const route = BASIC_API_URL + Endpoints.Register;
+  const response = await axios.post(
+    route,
+    {
+      username: dto.username,
+      email: dto.email,
+      password: dto.password,
+    },
+    {
+      validateStatus: () => true,
+    },
+  );
+
+  switch (response.status) {
+    case 422:
+      return {
+        ok: false,
+        status: response.status,
+        message: "Форма заполнена некорректно!",
+      };
+    case 400:
+      return {
+        ok: false,
+        status: response.status,
+        message:
+          "Пользователь с таким псевдонимом и/или адресом электронной почты уже существует",
+      };
+    case 200:
+      return {
+        ok: true,
+        status: response.status,
+        message: "Вы успешно зарегистрировались!",
+      };
+    default:
+      return {
+        ok: false,
+        status: 500,
+        message: "Возникла неизвестная ошибка, попробуйте позже",
+      };
+  }
+}
+
+export async function login(dto: LoginDTO): Promise<ActionResponse> {
   const cookiesStore = await cookies();
   const route = BASIC_API_URL + Endpoints.Login;
   const response = await axios.post<LoginApiResponse>(
     route,
     {
-      email,
-      password,
+      email: dto.email,
+      password: dto.password,
     },
     {
       validateStatus: () => true,
@@ -65,4 +107,11 @@ export async function me(): Promise<User> {
   }
 
   return response.data;
+}
+
+export async function logout() {
+  const cookieStorage = await cookies();
+  cookieStorage.delete("accessToken");
+
+  return redirect("/");
 }

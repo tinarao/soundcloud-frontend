@@ -2,6 +2,7 @@ import { getUserBySlug } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import AvatarPlaceholder from "@/assets/avatar-placeholder.jpg";
+import UserPageDetailsSidebar from "../_components/user-page-details-sidebar";
 
 type UserPageProps = {
   params: {
@@ -22,8 +23,6 @@ const UserPage = async ({ params }: UserPageProps) => {
     );
   }
 
-  console.log(user);
-
   return (
     <div className="grid h-full grid-cols-5">
       <div className="col-span-4 py-2 pr-2">
@@ -31,19 +30,7 @@ const UserPage = async ({ params }: UserPageProps) => {
           <div key={track.id}>{track.title}</div>
         ))}
       </div>
-      <div className="col-span-1 border-l py-2 pl-2">
-        <div className="space-y-1">
-          <Image
-            src={AvatarPlaceholder}
-            alt={"Аватар пользователя " + user.username}
-            width={400}
-            height={400}
-            className="rounded-full"
-            priority
-          />
-          <h1 className="text-center text-lg font-medium">{user.username}</h1>
-        </div>
-      </div>
+      <UserPageDetailsSidebar user={user} />
     </div>
   );
 };

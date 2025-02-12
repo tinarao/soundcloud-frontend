@@ -1,5 +1,6 @@
 "use client";
 
+import { register } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,25 +9,42 @@ import { toast } from "@/hooks/use-toast";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 
-const LoginPage = () => {
+const Page = () => {
   const { login } = useAuth();
   const router = useRouter();
 
   const form = useForm({
     defaultValues: {
+      username: "",
       email: "",
       password: "",
     },
     onSubmit: async ({ value }) => {
-      const res = await login({ email: value.email, password: value.password });
-      if (res.ok) {
-        router.replace("/app");
-      } else {
+      console.log(value);
+      const registerResponse = await register({ ...value });
+      if (!registerResponse.ok) {
         toast({
-          title: res.message ?? "Ошибка авторизации",
+          title: registerResponse.message ?? "Ошибка авторизации",
           variant: "destructive",
         });
+        return;
       }
+
+      toast({ title: "Вы успешно зарегистрированы" });
+
+      const loginResponse = await login({
+        email: value.email,
+        password: value.password,
+      });
+      if (!loginResponse.ok) {
+        toast({
+          title: "Ошибка авторизации",
+          description:
+            "Нам не удалось выполнить автоматическую авторизацию. Войдите в аккаунт вручную",
+        });
+      }
+
+      return router.replace("/login");
     },
   });
 
@@ -40,8 +58,24 @@ const LoginPage = () => {
         }}
         className="space-y-4"
       >
-        <h1 className="text-3xl font-bold">Авторизация</h1>
+        <h1 className="text-3xl font-bold">Регистрация</h1>
         <div className="space-y-4">
+          <div>
+            <form.Field name="username">
+              {(field) => (
+                <>
+                  <Label>Псевдоним</Label>
+                  <Input
+                    required
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                </>
+              )}
+            </form.Field>
+          </div>
           <div className="w-96">
             <form.Field name="email">
               {(field) => (
@@ -85,4 +119,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Page;

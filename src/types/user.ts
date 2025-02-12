@@ -13,7 +13,6 @@ type User = {
   avatarFilePath?: string;
   bannerFilePath?: string;
   links: string[];
-  password: string;
   createdAt: Date;
   updatedAt: Date;
 };

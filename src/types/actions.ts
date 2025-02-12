@@ -3,3 +3,14 @@ type ActionResponse = {
   status: number;
   message?: string;
 };
+
+type LoginDTO = {
+  email: string;
+  password: string;
+};
+
+type RegisterDTO = {
+  username: string;
+  email: string;
+  password: string;
+};

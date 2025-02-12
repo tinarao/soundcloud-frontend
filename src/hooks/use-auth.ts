@@ -5,7 +5,7 @@ import { login, me } from "@/actions/auth";
 interface UseAuth {
   user?: User;
   isLoggedIn: boolean;
-  login: (email: string, password: string) => Promise<ActionResponse>;
+  login: (dto: LoginDTO) => Promise<ActionResponse>;
   verify: () => Promise<void>;
 }
 
@@ -15,8 +15,8 @@ export const useAuth = create<UseAuth>()(
       user: undefined,
       isLoggedIn: false,
 
-      async login(email: string, password: string) {
-        const response = await login(email, password);
+      async login(dto: LoginDTO) {
+        const response = await login(dto);
         if (!response.ok) {
           return response;
         }
@@ -33,6 +33,7 @@ export const useAuth = create<UseAuth>()(
         try {
           console.log("Verified!");
           const userData = await me();
+          console.log(userData);
           set({ isLoggedIn: true, user: userData });
         } catch {
           console.log("Unauthorized!");
