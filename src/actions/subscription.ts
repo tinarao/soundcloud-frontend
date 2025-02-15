@@ -1,8 +1,8 @@
 "use server";
 
 import { BASIC_API_URL } from "@/lib/consts";
-import axios from "axios";
 import { cookies } from "next/headers";
+import { request } from "./auth";
 
 enum Endpoints {
   create = "subscription/",
@@ -20,17 +20,9 @@ export async function createSubscription(
   }
 
   const route = BASIC_API_URL + Endpoints.create + userToBeSubscribedToId;
+  const client = await request();
 
-  const res = await axios.post(
-    route,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken.value}`,
-      },
-      validateStatus: () => true,
-    },
-  );
+  const res = await client.post(route, {});
 
   switch (res.status) {
     case 404:
@@ -66,9 +58,9 @@ export async function removeSubscription(
   }
 
   const route = BASIC_API_URL + Endpoints.remove + userToBeUnubscribedFromId;
-  console.log(route);
+  const client = await request();
 
-  const res = await axios.delete(route, {
+  const res = await client.delete(route, {
     headers: {
       Authorization: `Bearer ${accessToken.value}`,
     },

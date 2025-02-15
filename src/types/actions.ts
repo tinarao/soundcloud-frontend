@@ -14,3 +14,11 @@ type RegisterDTO = {
   email: string;
   password: string;
 };
+
+type UploadTrackDTO = {
+  artworkFile: File;
+  audioFile: File;
+  genres: string[];
+  title: string;
+  description: string;
+};

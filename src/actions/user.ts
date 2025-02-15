@@ -1,15 +1,16 @@
 "use server";
 
 import { BASIC_API_URL } from "@/lib/consts";
-import axios from "axios";
+import { request } from "./auth";
 
 enum Endpoints {
   GetUserBySlug = "user/",
 }
 
-export const getUserBySlug = async (slug: string): Promise<UserWithTracks | null> => {
+export const getUserBySlug = async (slug: string): Promise<User | null> => {
   const route = BASIC_API_URL + Endpoints.GetUserBySlug + slug;
-  const response = await axios.get<UserWithTracks>(route, {
+  const client = await request();
+  const response = await client.get<User>(route, {
     validateStatus: () => true,
   });
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import AuthVerifier from "@/components/providers/auth-provider";
+import MasterAuthProvider from "@/components/providers/auth-provider-master";
 
 const inter = Inter({
   subsets: ["cyrillic"],
@@ -19,10 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ru">
       <body className={`${inter.className} antialiased`}>
         <Toaster />
-        <AuthVerifier />
+        <MasterAuthProvider />
         {children}
       </body>
     </html>

@@ -30,15 +30,13 @@ export const useAuth = create<UseAuth>()(
       },
 
       async verify() {
-        try {
-          console.log("Verified!");
-          const userData = await me();
-          console.log(userData);
-          set({ isLoggedIn: true, user: userData });
-        } catch {
-          console.log("Unauthorized!");
+        const userData = await me();
+        if (!userData) {
           set({ isLoggedIn: false, user: undefined });
+          return;
         }
+
+        set({ isLoggedIn: true, user: userData });
       },
     }),
     {

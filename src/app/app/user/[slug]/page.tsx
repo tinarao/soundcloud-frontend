@@ -1,8 +1,9 @@
 import { getUserBySlug } from "@/actions/user";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import AvatarPlaceholder from "@/assets/avatar-placeholder.jpg";
 import UserPageDetailsSidebar from "../_components/user-page-details-sidebar";
+import { BASIC_API_URL } from "@/lib/consts";
+import TrackBlock from "../../_components/track-block";
+import { request } from "@/actions/auth";
 
 type UserPageProps = {
   params: {
@@ -10,10 +11,25 @@ type UserPageProps = {
   };
 };
 
+const getTracksByUserSlug = async (slug: string): Promise<Track[]> => {
+  const route = BASIC_API_URL + "track/by-user/" + slug;
+  const client = await request();
+  const response = await client<Track[]>(route, { validateStatus: () => true });
+  if (response.status !== 200) {
+    return [];
+  }
+
+  return response.data;
+};
+
 const UserPage = async ({ params }: UserPageProps) => {
   const { slug } = await params;
 
-  const user = await getUserBySlug(slug);
+  const [user, tracks] = await Promise.all([
+    getUserBySlug(slug),
+    getTracksByUserSlug(slug),
+  ]);
+
   if (!user) {
     return (
       <div className="flex h-full flex-col items-center justify-center space-y-2">
@@ -25,9 +41,9 @@ const UserPage = async ({ params }: UserPageProps) => {
 
   return (
     <div className="grid h-full grid-cols-5">
-      <div className="col-span-4 py-2 pr-2">
-        {user.tracks.map((track) => (
-          <div key={track.id}>{track.title}</div>
+      <div className="col-span-4 space-y-2 py-2 pr-2">
+        {tracks.map((track) => (
+          <TrackBlock key={track.id} track={track} author={user} />
         ))}
       </div>
       <UserPageDetailsSidebar user={user} />

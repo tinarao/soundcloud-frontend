@@ -52,9 +52,15 @@ const UserPopover = () => {
           </Link>
         </Button>
         <hr />
-        <Button variant="ghost" className="hover:bg-red-500 hover:text-white">
-          <LogOut />
-          Выйти
+        <Button
+          variant="ghost"
+          className="hover:bg-red-500 hover:text-white"
+          asChild
+        >
+          <Link href="/logout">
+            <LogOut />
+            Выйти
+          </Link>
         </Button>
       </PopoverContent>
     </Popover>

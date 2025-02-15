@@ -1,7 +1,7 @@
 "use client";
 
-import axios from "axios";
-import { useRef, useState } from "react";
+import axios, { AxiosInstance } from "axios";
+import { useRef, useState, useTransition } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,15 +9,17 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import Cookies from "cookies-js";
 import { BASIC_API_URL } from "@/lib/consts";
 import { useRouter } from "next/navigation";
+import { request } from "@/actions/auth";
+import { uploadTrack } from "@/actions/track";
 
 const UploadTrackForm = () => {
   const router = useRouter();
   const [genres, setGenres] = useState<string[]>([]);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
+  const [isLoading, startTransition] = useTransition();
   const genreInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm({
@@ -43,34 +45,15 @@ const UploadTrackForm = () => {
         genres,
       };
 
-      const token = Cookies.get("accessToken");
-
-      const apiRoute = BASIC_API_URL + "track";
-      const response = await axios.postForm(apiRoute, data, {
-        validateStatus: () => true,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      switch (response.status) {
-        case 422:
-          toast({
-            title:
-              "Форма заполнена некорректно. Обновите страницу и заполните её ещё раз.",
-          });
-          return;
-        case 401:
-          toast({
-            title:
-              "Ошибка авторизации. Обновите страницу и заполните форму ещё раз.",
-          });
-          return;
-        default:
-          toast({ title: "Трек успешно загружен!" });
-          router.replace("/app/track/" + response.data.slug);
-          return;
+      const result = await uploadTrack(data);
+      if (!result.ok) {
+        toast({ title: result.message });
+        return;
       }
+
+      toast({ title: "Трек успешно загружен!" });
+      router.replace("/app/track/" + result.slug);
+      return;
     },
   });
 

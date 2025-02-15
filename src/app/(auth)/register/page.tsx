@@ -20,7 +20,6 @@ const Page = () => {
       password: "",
     },
     onSubmit: async ({ value }) => {
-      console.log(value);
       const registerResponse = await register({ ...value });
       if (!registerResponse.ok) {
         toast({
@@ -42,9 +41,10 @@ const Page = () => {
           description:
             "Нам не удалось выполнить автоматическую авторизацию. Войдите в аккаунт вручную",
         });
+        return;
       }
 
-      return router.replace("/login");
+      return router.replace("/app");
     },
   });
 

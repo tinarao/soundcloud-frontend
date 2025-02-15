@@ -1,7 +1,7 @@
 "use server";
 
 import axios from "axios";
-import { BASIC_API_URL } from "@/lib/consts";
+import { ACCESS_TOKEN_NAME, BASIC_API_URL } from "@/lib/consts";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -19,17 +19,12 @@ enum Endpoints {
 
 export async function register(dto: RegisterDTO): Promise<ActionResponse> {
   const route = BASIC_API_URL + Endpoints.Register;
-  const response = await axios.post(
-    route,
-    {
-      username: dto.username,
-      email: dto.email,
-      password: dto.password,
-    },
-    {
-      validateStatus: () => true,
-    },
-  );
+  const client = await request();
+  const response = await client.post(route, {
+    username: dto.username,
+    email: dto.email,
+    password: dto.password,
+  });
 
   switch (response.status) {
     case 422:
@@ -62,17 +57,12 @@ export async function register(dto: RegisterDTO): Promise<ActionResponse> {
 
 export async function login(dto: LoginDTO): Promise<ActionResponse> {
   const cookiesStore = await cookies();
+  const client = await request();
   const route = BASIC_API_URL + Endpoints.Login;
-  const response = await axios.post<LoginApiResponse>(
-    route,
-    {
-      email: dto.email,
-      password: dto.password,
-    },
-    {
-      validateStatus: () => true,
-    },
-  );
+  const response = await client.post<LoginApiResponse>(route, {
+    email: dto.email,
+    password: dto.password,
+  });
 
   if (response.status !== 200) {
     return {
@@ -82,28 +72,24 @@ export async function login(dto: LoginDTO): Promise<ActionResponse> {
     };
   }
 
-  cookiesStore.set("accessToken", response.data.accessToken);
+  cookiesStore.set(ACCESS_TOKEN_NAME, response.data.accessToken);
 
   return { ok: true, status: response.status, message: response.data.message };
 }
 
-export async function me(): Promise<User> {
+export async function me(): Promise<User | null> {
   const cookiesStore = await cookies();
-  const token = cookiesStore.get("accessToken");
+  const token = cookiesStore.get(ACCESS_TOKEN_NAME);
   if (!token) {
-    throw new Error("No access token found in cookies");
+    return null;
   }
 
   const route = BASIC_API_URL + Endpoints.Me;
-  const response = await axios.get<User>(route, {
-    headers: {
-      Authorization: `Bearer ${token.value}`,
-    },
-    validateStatus: () => true,
-  });
+  const client = await request();
+  const response = await client.get<User>(route);
 
   if (response.status !== 200) {
-    throw new Error("Unauthorized");
+    return null;
   }
 
   return response.data;
@@ -111,7 +97,27 @@ export async function me(): Promise<User> {
 
 export async function logout() {
   const cookieStorage = await cookies();
-  cookieStorage.delete("accessToken");
+  cookieStorage.delete(ACCESS_TOKEN_NAME);
 
   return redirect("/");
+}
+
+//
+
+/**
+ * @description Проверяет права пользователя и возвращает соответствующий axios-клиент
+ */
+export async function request() {
+  const cookieStorage = await cookies();
+  const token = cookieStorage.get(ACCESS_TOKEN_NAME);
+  if (!token) {
+    return axios.create({ validateStatus: () => true });
+  }
+
+  return axios.create({
+    validateStatus: () => true,
+    headers: {
+      Authorization: `Bearer ${token.value}`,
+    },
+  });
 }

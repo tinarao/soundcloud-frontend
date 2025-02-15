@@ -3,13 +3,7 @@
 import AvatarPlaceholder from "@/assets/avatar-placeholder.jpg";
 import Image from "next/image";
 import { useAuth } from "@/hooks/use-auth";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  LoaderCircle,
-  Subscript,
-  UserRoundMinus,
-  UserRoundPlus,
-} from "lucide-react";
+import { LoaderCircle, UserRoundMinus, UserRoundPlus } from "lucide-react";
 import SubscribeButton from "./subscribe-button";
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
@@ -17,6 +11,7 @@ import { BASIC_API_URL } from "@/lib/consts";
 import { toast } from "@/hooks/use-toast";
 import UnsubscribeButton from "./unsubscrube-button";
 import { useRouter } from "next/navigation";
+import { request } from "@/actions/auth";
 
 const UserPageDetailsSidebar = ({ user }: { user: User }) => {
   const router = useRouter();
@@ -45,12 +40,12 @@ const UserPageDetailsSidebar = ({ user }: { user: User }) => {
 
   useEffect(() => {
     const getData = async () => {
-      console.log("fetching");
       try {
         const route = BASIC_API_URL + "subscription/" + user.id;
-        const response = await axios<User[]>(route, {
-          validateStatus: () => true,
-        });
+        const client = await request();
+        const response = await client<User[]>(route);
+
+        console.log(response);
         if (response.status !== 200) {
           if (response.status === 404) {
             toast({
@@ -70,6 +65,8 @@ const UserPageDetailsSidebar = ({ user }: { user: User }) => {
         }
 
         setSubscribers(response.data);
+      } catch (e) {
+        console.log(e);
       } finally {
         setIsSubscribersFetched(true);
       }

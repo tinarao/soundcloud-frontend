@@ -1,10 +1,11 @@
+import { request } from "@/actions/auth";
 import { BASIC_API_URL } from "@/lib/consts";
 import axios from "axios";
 import React from "react";
 
 const Page = async () => {
-  const best = await axios<Track[]>(BASIC_API_URL + "track/hot");
-  console.log(best);
+  const client = await request();
+  const best = await client<Track[]>(BASIC_API_URL + "track/hot");
 
   return (
     <div className="grid grid-cols-4">
