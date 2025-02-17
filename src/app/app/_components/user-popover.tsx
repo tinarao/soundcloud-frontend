@@ -10,7 +10,9 @@ import { useAuth } from "@/hooks/use-auth";
 import {
   BookAudio,
   CassetteTape,
+  ChartSpline,
   Cog,
+  LoaderCircle,
   LogOut,
   Upload,
   User,
@@ -23,7 +25,9 @@ const UserPopover = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button>{user?.username}</Button>
+        <Button>
+          {user ? user?.username : <LoaderCircle className="animate-spin" />}
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-48 space-y-1 rounded-lg bg-white p-2 shadow-lg *:w-full *:justify-start">
         <Button variant="ghost" asChild>
@@ -39,6 +43,11 @@ const UserPopover = () => {
         <Button variant="ghost">
           <CassetteTape />
           Плейлисты
+        </Button>
+        <Button variant="ghost" asChild>
+          <Link href="/app/statistics">
+            <ChartSpline /> Статистика
+          </Link>
         </Button>
         <Button variant="ghost" asChild>
           <Link href="/app/settings">

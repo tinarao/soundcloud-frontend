@@ -1,7 +1,7 @@
 "use server";
 
-import axios from "axios";
 import { ACCESS_TOKEN_NAME, BASIC_API_URL } from "@/lib/consts";
+import { request } from "@/lib/utils";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -104,20 +104,12 @@ export async function logout() {
 
 //
 
-/**
- * @description Проверяет права пользователя и возвращает соответствующий axios-клиент
- */
-export async function request() {
+export async function getToken() {
   const cookieStorage = await cookies();
   const token = cookieStorage.get(ACCESS_TOKEN_NAME);
   if (!token) {
-    return axios.create({ validateStatus: () => true });
+    return null;
   }
 
-  return axios.create({
-    validateStatus: () => true,
-    headers: {
-      Authorization: `Bearer ${token.value}`,
-    },
-  });
+  return token.value;
 }

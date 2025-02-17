@@ -5,13 +5,12 @@ import Image from "next/image";
 import { useAuth } from "@/hooks/use-auth";
 import { LoaderCircle, UserRoundMinus, UserRoundPlus } from "lucide-react";
 import SubscribeButton from "./subscribe-button";
-import { useCallback, useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import { BASIC_API_URL } from "@/lib/consts";
 import { toast } from "@/hooks/use-toast";
 import UnsubscribeButton from "./unsubscrube-button";
 import { useRouter } from "next/navigation";
-import { request } from "@/actions/auth";
+import { request } from "@/lib/utils";
 
 const UserPageDetailsSidebar = ({ user }: { user: User }) => {
   const router = useRouter();

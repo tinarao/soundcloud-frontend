@@ -1,25 +1,22 @@
 "use client";
 
-import axios, { AxiosInstance } from "axios";
 import { useRef, useState, useTransition } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn, request } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { BASIC_API_URL } from "@/lib/consts";
+import { ACCESS_TOKEN_NAME, BASIC_API_URL } from "@/lib/consts";
 import { useRouter } from "next/navigation";
-import { request } from "@/actions/auth";
-import { uploadTrack } from "@/actions/track";
+import Cookies from "cookies-js";
 
 const UploadTrackForm = () => {
   const router = useRouter();
   const [genres, setGenres] = useState<string[]>([]);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
-  const [isLoading, startTransition] = useTransition();
   const genreInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm({
@@ -38,6 +35,13 @@ const UploadTrackForm = () => {
         return;
       }
 
+      const token = Cookies.get(ACCESS_TOKEN_NAME);
+      if (!token) {
+        toast({ title: "Ошибка авторизации" });
+        router.replace("/login");
+        return;
+      }
+
       const data = {
         ...value,
         artworkFile,
@@ -45,15 +49,42 @@ const UploadTrackForm = () => {
         genres,
       };
 
-      const result = await uploadTrack(data);
-      if (!result.ok) {
-        toast({ title: result.message });
-        return;
-      }
+      const apiRoute = BASIC_API_URL + "track";
+      const client = await request();
+      const response = await client.post(apiRoute, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      // const response = await axios.post(apiRoute, data, {
+      //   headers: {
+      //     "Content-Type": "multipart/form-data",
+      //   },
+      // });
 
-      toast({ title: "Трек успешно загружен!" });
-      router.replace("/app/track/" + result.slug);
-      return;
+      switch (response.status) {
+        case 422:
+          toast({
+            title: "Ошибка!",
+            description:
+              "Форма заполнена некорректно. Обновите страницу и попробуйте заново",
+          });
+          return;
+        case 401:
+          toast({
+            title: "Ошибка!",
+            description:
+              "Ошибка авторизации. Обновите страницу и заполните форму ещё раз.",
+          });
+          return;
+        case 201:
+          toast({ title: "Трек успешно загружен!" });
+          router.replace("/app/track/" + response.data.slug);
+          return;
+        default:
+          toast({ title: "Ошибка сервера!" });
+          return;
+      }
     },
   });
 

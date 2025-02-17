@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import MasterAuthProvider from "@/components/providers/auth-provider-master";
+import AuthVerifier from "@/components/providers/auth-provider";
 
 const inter = Inter({
   subsets: ["cyrillic"],
@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="ru">
       <body className={`${inter.className} antialiased`}>
         <Toaster />
-        <MasterAuthProvider />
+        <AuthVerifier />
         {children}
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use server";
 
 import { BASIC_API_URL } from "@/lib/consts";
-import { request } from "./auth";
+import { request } from "@/lib/utils";
 
 enum Endpoints {
   GetUserBySlug = "user/",

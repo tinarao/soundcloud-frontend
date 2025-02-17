@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
 import { useForm } from "@tanstack/react-form";
+import { LoaderCircle, UserCheck } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
@@ -76,10 +78,21 @@ const LoginPage = () => {
               )}
             </form.Field>
           </div>
-          <div>
-            <Button>Войти</Button>
+          <div className="inline-flex w-full items-center justify-between">
+            <Button disabled={form.state.isSubmitting}>
+              {form.state.isSubmitting ? (
+                <LoaderCircle className="animate-spin" />
+              ) : (
+                <UserCheck />
+              )}{" "}
+              Войти
+            </Button>
+            <Button disabled={form.state.isSubmitting} variant="ghost">
+              <Link href="/register">Нет аккаунта?</Link>
+            </Button>
           </div>
         </div>
+        <hr />
       </form>
     </div>
   );

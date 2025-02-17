@@ -1,8 +1,8 @@
 "use server";
 
 import { BASIC_API_URL } from "@/lib/consts";
+import { request } from "@/lib/utils";
 import { cookies } from "next/headers";
-import { request } from "./auth";
 
 enum Endpoints {
   create = "subscription/",

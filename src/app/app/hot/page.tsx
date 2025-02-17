@@ -1,7 +1,5 @@
-import { request } from "@/actions/auth";
 import { BASIC_API_URL } from "@/lib/consts";
-import axios from "axios";
-import React from "react";
+import { request } from "@/lib/utils";
 
 const Page = async () => {
   const client = await request();

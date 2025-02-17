@@ -12,4 +12,7 @@ type Track = {
   duration: number;
   listens: number;
   likes: number;
+
+  userId: number;
+  user?: User;
 };

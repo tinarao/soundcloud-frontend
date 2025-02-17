@@ -1,9 +1,10 @@
 import { getUserBySlug } from "@/actions/user";
 import { Button } from "@/components/ui/button";
 import UserPageDetailsSidebar from "../_components/user-page-details-sidebar";
-import { BASIC_API_URL } from "@/lib/consts";
+import { ACCESS_TOKEN_NAME, BASIC_API_URL } from "@/lib/consts";
 import TrackBlock from "../../_components/track-block";
-import { request } from "@/actions/auth";
+import { request } from "@/lib/utils";
+import { cookies } from "next/headers";
 
 type UserPageProps = {
   params: {
@@ -14,7 +15,7 @@ type UserPageProps = {
 const getTracksByUserSlug = async (slug: string): Promise<Track[]> => {
   const route = BASIC_API_URL + "track/by-user/" + slug;
   const client = await request();
-  const response = await client<Track[]>(route, { validateStatus: () => true });
+  const response = await client<Track[]>(route);
   if (response.status !== 200) {
     return [];
   }
@@ -24,6 +25,7 @@ const getTracksByUserSlug = async (slug: string): Promise<Track[]> => {
 
 const UserPage = async ({ params }: UserPageProps) => {
   const { slug } = await params;
+  const cookieStorage = await cookies();
 
   const [user, tracks] = await Promise.all([
     getUserBySlug(slug),
@@ -41,7 +43,7 @@ const UserPage = async ({ params }: UserPageProps) => {
 
   return (
     <div className="grid h-full grid-cols-5">
-      <div className="col-span-4 space-y-2 py-2 pr-2">
+      <div className="col-span-4 space-y-4 py-2 pr-2">
         {tracks.map((track) => (
           <TrackBlock key={track.id} track={track} author={user} />
         ))}
