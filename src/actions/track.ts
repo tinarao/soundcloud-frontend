@@ -3,6 +3,13 @@
 import { BASIC_API_URL, SIGNED_URL_API_PATH } from "@/lib/consts";
 import { request } from "@/lib/utils";
 
+/**
+ * Возвращает трек с автором
+ *
+ * @param slug - Slug трека
+ * @returns Action Response с информацией по треку (включая автора). Трек может быть undefined, если трек не найден / к нему закрыт доступ
+ */
+
 export async function getTrackBySlug(
   slug: string,
 ): Promise<ActionResponse & { track?: Track }> {
@@ -23,12 +30,11 @@ export async function getTrackBySlug(
 }
 
 /**
- * Retrieves signed URLs for a track and image associated with a given slug.
+ * Возвращает подписанные ссылки по slug
  *
- * @param slug - The unique identifier for the track.
- * @returns Action response with signed URLs for the audio file and image.
+ * @param slug - Slug выбранного трека
+ * @returns Action response и подписанные ссылки на файлы обложки и аудиофайла
  */
-
 export async function getSignedUrlsBySlug(
   slug: string,
 ): Promise<
@@ -54,4 +60,21 @@ export async function getSignedUrlsBySlug(
   } catch (error) {
     return { ok: true, status: 500, message: "Ошибка!" };
   }
+}
+
+/**
+ * Фиксирует уникальное прослушивание выбранного трека
+ *
+ * @param slug - Slug выбранного трека
+ * @returns Action Response
+ */
+export async function captureListen(slug: string): Promise<ActionResponse> {
+  const client = await request();
+  const route = BASIC_API_URL + "track/" + slug + "/listens";
+  const result = await client.patch(route);
+  if (result.status !== 204) {
+    return { ok: false, status: result.status };
+  }
+
+  return { ok: true, status: 204 };
 }

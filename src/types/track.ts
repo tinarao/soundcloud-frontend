@@ -12,6 +12,7 @@ type Track = {
   duration: number;
   listens: number;
   likes: number;
+  createdAt: string;
 
   userId: number;
   user?: User;

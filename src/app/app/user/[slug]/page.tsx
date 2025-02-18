@@ -25,7 +25,6 @@ const getTracksByUserSlug = async (slug: string): Promise<Track[]> => {
 
 const UserPage = async ({ params }: UserPageProps) => {
   const { slug } = await params;
-  const cookieStorage = await cookies();
 
   const [user, tracks] = await Promise.all([
     getUserBySlug(slug),
@@ -42,7 +41,7 @@ const UserPage = async ({ params }: UserPageProps) => {
   }
 
   return (
-    <div className="grid h-full grid-cols-5">
+    <div className="container mx-auto grid h-full grid-cols-5">
       <div className="col-span-4 space-y-4 py-2 pr-2">
         {tracks.map((track) => (
           <TrackBlock key={track.id} track={track} author={user} />

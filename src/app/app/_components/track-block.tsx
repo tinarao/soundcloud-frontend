@@ -5,21 +5,22 @@ import Placeholder from "@/assets/avatar-placeholder.jpg";
 import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import { Button } from "@/components/ui/button";
-import { Lock, Pause, Play } from "lucide-react";
+import { AudioWaveform, Ear, Lock, Pause, Play } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import TrackDropdownMenu from "./track-dropdown-menu";
-import { getSignedUrlsBySlug } from "@/actions/track";
+import { captureListen, getSignedUrlsBySlug } from "@/actions/track";
+import Waveform from "./waveform";
 
 const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
   const { user } = useAuth();
-  const [trackUrl, setTrackUrl] = useState<string | undefined>(undefined);
+  const [audioFileUrl, setAudioFileUrl] = useState<string | undefined>(
+    undefined,
+  );
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   const [isAuthor, setIsAuthor] = useState(false);
   const [isPlaying, toggleIsPlaying] = useState(false);
-
-  const containerRef = useRef(null);
-  const waveSurferRef = useRef(null);
+  const [isListenCaptured, setIsListenCaptured] = useState(false);
 
   useEffect(() => {
     if (!track.peaks || track.peaks.length === 0) {
@@ -30,7 +31,7 @@ const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
   useEffect(() => {
     const getSignedUrl = async () => {
       const urls = await getSignedUrlsBySlug(track.slug);
-      setTrackUrl(urls.trackSignedUrl);
+      setAudioFileUrl(urls.trackSignedUrl);
       setImageUrl(urls.imageSignedUrl);
     };
 
@@ -43,34 +44,18 @@ const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (!track.peaks || track.peaks.length === 0) {
+  const captureListenEvent = async () => {
+    if (isListenCaptured) {
       return;
     }
 
-    const waveSurfer = WaveSurfer.create({
-      container: containerRef.current!,
-      cursorWidth: 0,
-      url: trackUrl,
-      barWidth: 6,
-      barHeight: 0.7,
-      waveColor: "#d492d6",
-      progressColor: "#cb748e",
-      barRadius: 2,
-      backend: "MediaElement",
-      peaks: [track.peaks ?? []],
-      duration: 210,
-    });
-
-    waveSurfer.on("ready", () => {
-      // @ts-ignore
-      waveSurferRef.current = waveSurfer;
-    });
-
-    return () => {
-      waveSurfer.destroy();
-    };
-  }, [trackUrl]);
+    const result = await captureListen(track.slug);
+    if (result.ok) {
+      console.log("Listen captured.");
+      setIsListenCaptured(true);
+      return;
+    }
+  };
 
   return (
     <div className="flex w-full">
@@ -86,16 +71,7 @@ const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
           <Button
             size="icon"
             className="rounded-full"
-            onClick={() => {
-              if (isPlaying) {
-                // @ts-ignore
-                waveSurferRef.current.pause();
-              } else {
-                // @ts-ignore
-                waveSurferRef.current.play();
-              }
-              toggleIsPlaying(!isPlaying);
-            }}
+            onClick={() => toggleIsPlaying(!isPlaying)}
           >
             {isPlaying ? (
               <Pause className="fill-white" />
@@ -110,15 +86,15 @@ const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
             {track.title}
           </Link>
         </div>
-        {track.peaks && track.peaks.length !== 0 ? (
-          <div>
-            <div ref={containerRef} />
-          </div>
-        ) : (
-          <div>
-            <p className="text-center">Трек анализируется</p>
-          </div>
-        )}
+
+        <Waveform
+          track={track}
+          audioFileUrl={audioFileUrl}
+          isListenCaptured={isListenCaptured}
+          isPlaying={isPlaying}
+          onPlay={() => captureListenEvent()}
+        />
+
         <div className="inline-flex w-full items-center justify-between rounded-md bg-slate-200 p-1">
           <div className="flex items-center">
             {!track.isPublic && (
@@ -129,6 +105,10 @@ const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
                 {author.username}
               </Link>
             </Button>
+            <span className="flex w-10 items-center justify-center text-sm font-medium text-muted-foreground">
+              <AudioWaveform className="mr-2 size-4" />
+              {track.listens}
+            </span>
           </div>
           <div className="inline-flex items-center gap-x-2">
             <Button variant="ghost" size="sm" asChild>

@@ -1,9 +1,11 @@
 import { me } from "@/actions/auth";
-import { redirect } from "next/navigation";
-import React, { PropsWithChildren } from "react";
-import UserPopover from "./_components/user-popover";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Bell, Mail } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { PropsWithChildren } from "react";
+
+import UserPopover from "./_components/user-popover";
 
 const Layout = async ({ children }: PropsWithChildren) => {
   const user = await me();
@@ -13,15 +15,21 @@ const Layout = async ({ children }: PropsWithChildren) => {
     <div className="flex h-screen flex-col items-center justify-center">
       <header className="w-full border-b py-4">
         <div className="container mx-auto flex items-center justify-between">
-          <Button>
+          <Button variant="ghost">
             <Link href="/app">Soundcloud</Link>
           </Button>
-          <UserPopover />
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="ghost">
+              <Bell fill="gray" stroke="gray" />
+            </Button>
+            <Button size="icon" variant="ghost">
+              <Mail stroke="gray" className="stroke-[2.7]" />
+            </Button>
+            <UserPopover />
+          </div>
         </div>
       </header>
-      <main className="container mx-auto flex-1 overflow-y-auto">
-        {children}
-      </main>
+      <main className="w-full flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 };

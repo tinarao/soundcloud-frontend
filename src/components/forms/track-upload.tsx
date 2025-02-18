@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,11 +56,6 @@ const UploadTrackForm = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      // const response = await axios.post(apiRoute, data, {
-      //   headers: {
-      //     "Content-Type": "multipart/form-data",
-      //   },
-      // });
 
       switch (response.status) {
         case 422:
@@ -82,6 +77,7 @@ const UploadTrackForm = () => {
           router.replace("/app/track/" + response.data.slug);
           return;
         default:
+          console.log(response.data);
           toast({ title: "Ошибка сервера!" });
           return;
       }
@@ -129,7 +125,7 @@ const UploadTrackForm = () => {
                     <Label>Описание</Label>
                     <Textarea
                       rows={6}
-                      maxLength={600}
+                      maxLength={1000}
                       className="resize-none"
                       name={field.name}
                       value={field.state.value}

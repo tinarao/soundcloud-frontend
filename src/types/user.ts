@@ -13,8 +13,7 @@ type User = {
   avatarFilePath?: string;
   bannerFilePath?: string;
   links: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
 };
 
 type UserStatisticDTO = {

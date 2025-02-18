@@ -74,7 +74,7 @@ const UserPageDetailsSidebar = ({ user }: { user: User }) => {
   }, []);
 
   return (
-    <aside className="col-span-1 border-l py-2 pl-2">
+    <aside className="col-span-1 my-2 ml-2 rounded-md bg-secondary/50 p-6">
       <Image
         src={AvatarPlaceholder}
         width={300}

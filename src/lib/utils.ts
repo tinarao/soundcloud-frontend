@@ -20,3 +20,12 @@ export async function request() {
     },
   });
 }
+
+export const secondsToMinutes = (seconds: number) => {
+  let minutes = Math.floor(seconds / 60);
+  let secondsLeft: number | string = seconds % 60;
+  if (secondsLeft < 10) {
+    secondsLeft = `0${secondsLeft}`;
+  }
+  return `${minutes}:${secondsLeft}`;
+};

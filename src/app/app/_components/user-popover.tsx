@@ -25,7 +25,7 @@ const UserPopover = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button>
+        <Button variant="outline">
           {user ? user?.username : <LoaderCircle className="animate-spin" />}
         </Button>
       </PopoverTrigger>

@@ -1,8 +1,8 @@
-import { me, request } from "@/actions/auth";
-import UploadTrackForm from "@/components/forms/track-upload";
 import { LoaderCircle } from "lucide-react";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { me } from "@/actions/auth";
+import UploadTrackForm from "@/components/forms/track-upload";
+import { redirect } from "next/navigation";
 
 const UploadPage = async () => {
   try {
