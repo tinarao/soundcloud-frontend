@@ -77,6 +77,28 @@ const TrackDropdownMenu = ({ track }: { track: Track }) => {
     }
   };
 
+  const handleChangeTrackVisibility = async () => {
+    let newIsPublic = track.isPublic ? false : true;
+
+    const client = await request();
+    const response = await client.patch(
+      BASIC_API_URL + "track/" + track.slug + "/visibility/" + newIsPublic,
+    );
+    if (response.status === 204) {
+      toast({ title: "Доступность трека изменена", variant: "success" });
+      router.refresh();
+      return;
+    }
+
+    toast({
+      title: newIsPublic
+        ? "Не удалось опубликовать трек"
+        : "Не удалось скрыть трек",
+      description: response.data,
+    });
+    return;
+  };
+
   return (
     <AlertDialog>
       <DropdownMenu>
@@ -89,6 +111,12 @@ const TrackDropdownMenu = ({ track }: { track: Track }) => {
           <DropdownMenuLabel>{track.title}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>Редактировать</DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleChangeTrackVisibility}
+            title="Изменить доступ посторонних пользователей к треку"
+          >
+            {track.isPublic ? "Скрыть" : "Опубликовать"}
+          </DropdownMenuItem>
           <DropdownMenuItem disabled={!Boolean(track.isPublic)}>
             Поделиться
           </DropdownMenuItem>
@@ -109,6 +137,7 @@ const TrackDropdownMenu = ({ track }: { track: Track }) => {
         <AlertDialogFooter>
           <AlertDialogCancel>Отмена</AlertDialogCancel>
           <AlertDialogAction
+            disabled={isDeleting}
             onClick={handleDeleteTrack}
             className="bg-red-500 text-white hover:bg-red-400"
           >

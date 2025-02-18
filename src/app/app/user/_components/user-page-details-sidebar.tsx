@@ -44,7 +44,6 @@ const UserPageDetailsSidebar = ({ user }: { user: User }) => {
         const client = await request();
         const response = await client<User[]>(route);
 
-        console.log(response);
         if (response.status !== 200) {
           if (response.status === 404) {
             toast({

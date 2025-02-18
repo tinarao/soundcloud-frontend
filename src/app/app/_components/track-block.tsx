@@ -9,11 +9,14 @@ import { Lock, Pause, Play } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import TrackDropdownMenu from "./track-dropdown-menu";
+import { getSignedUrlsBySlug } from "@/actions/track";
 
 const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
-  const [isPlaying, toggleIsPlaying] = useState(false);
-  const [isAuthor, setIsAuthor] = useState(false);
   const { user } = useAuth();
+  const [trackUrl, setTrackUrl] = useState<string | undefined>(undefined);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [isAuthor, setIsAuthor] = useState(false);
+  const [isPlaying, toggleIsPlaying] = useState(false);
 
   const containerRef = useRef(null);
   const waveSurferRef = useRef(null);
@@ -23,6 +26,16 @@ const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
       // try again to analytics
     }
   }, []);
+
+  useEffect(() => {
+    const getSignedUrl = async () => {
+      const urls = await getSignedUrlsBySlug(track.slug);
+      setTrackUrl(urls.trackSignedUrl);
+      setImageUrl(urls.imageSignedUrl);
+    };
+
+    getSignedUrl();
+  }, [track]);
 
   useEffect(() => {
     if (author.id === user?.id) {
@@ -38,7 +51,7 @@ const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
     const waveSurfer = WaveSurfer.create({
       container: containerRef.current!,
       cursorWidth: 0,
-      url: `http://localhost:5129/api/File/track/${track.slug}`,
+      url: trackUrl,
       barWidth: 6,
       barHeight: 0.7,
       waveColor: "#d492d6",
@@ -57,16 +70,16 @@ const TrackBlock = ({ track, author }: { track: Track; author: User }) => {
     return () => {
       waveSurfer.destroy();
     };
-  }, []);
+  }, [trackUrl]);
 
   return (
     <div className="flex w-full">
       <Image
-        src={Placeholder}
+        src={imageUrl ?? Placeholder}
         width={250}
         height={250}
         alt={track.title}
-        className="rounded-md"
+        className="aspect-square rounded-md object-cover"
       />
       <div className="flex w-full flex-col justify-between pl-2">
         <div className="inline-flex items-center gap-x-3">
